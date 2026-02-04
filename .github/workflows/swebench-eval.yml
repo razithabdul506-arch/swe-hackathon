@@ -23,6 +23,8 @@ jobs:
         run: |
           echo "Setting up environment..."
           apt-get update && apt-get install -y git
+          pip install anthropic
+
 
       - name: Clone and setup OpenLibrary repository
         working-directory: /testbed
