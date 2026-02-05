@@ -23,7 +23,7 @@ jobs:
         run: |
           echo "Setting up environment..."
           apt-get update && apt-get install -y git
-          pip install google-generativeai
+          pip install google-genai
 
 
       - name: Clone and setup OpenLibrary repository
