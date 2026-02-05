@@ -14,7 +14,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
 
-from anthropic import Anthropic
+import google.generativeai as genai
+
 
 # Initialize the agent log file
 AGENT_LOG_PATH = "/tmp/agent.log"
@@ -265,12 +266,15 @@ def main():
     task = load_task(args.task_file)
 
     # Initialize Claude client
-    api_key = os.environ.get("CLAUDE_API_KEY")
+    api_key = os.environ.get("GEMINI_API_KEY")
+
     if not api_key:
-        print("Error: CLAUDE_API_KEY environment variable not set")
+        print("Error: GEMINI_API_KEY not set")
         sys.exit(1)
 
-    client = Anthropic(api_key=api_key)
+    genai.configure(api_key=api_key)
+
+    model = genai.GenerativeModel("gemini-1.5-pro")
 
     # Prepare the task instruction
     task_instruction = f"""
@@ -317,17 +321,12 @@ Focus on the files mentioned in the task: {', '.join(task['files_to_modify'])}
         print(f"Iteration {iteration + 1}/{max_iterations}")
 
         # Get Claude's response
-        response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=8192,
-            messages=messages,
-            tools=create_tools()
-        )
+        response = model.generate_content(messages[-1]["content"])
 
         # Log the response
         log_to_agent({
             "type": "response",
-            "content": response.content[0].text if response.content and hasattr(response.content[0], 'text') else "",
+            "content": response.text if response.content and hasattr(response.content[0], 'text') else "",
             "stop_reason": response.stop_reason
         })
 
